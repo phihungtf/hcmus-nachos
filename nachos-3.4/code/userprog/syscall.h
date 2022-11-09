@@ -31,7 +31,7 @@
 #define SC_Yield	10
 #define SC_ReadChar 	11
 #define SC_PrintChar 	12
-#define SC_ReadInt 	13
+#define SC_ReadInt      13
 #define SC_PrintInt 	14
 #define SC_ReadString 	15
 #define SC_PrintString 	16
