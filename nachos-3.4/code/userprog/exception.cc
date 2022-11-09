@@ -21,9 +21,9 @@
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
-#include "copyright.h"
-#include "system.h"
-#include "syscall.h"
+// #include "copyright.h"
+// #include "system.h"
+// #include "syscall.h"
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -48,12 +48,97 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
-void fetchNext() {
-    // Tang thanh ghi program counter.
-    machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
-    machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
-    machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+// void fetchNext() {
+//     // Tang thanh ghi program counter.
+//     machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+//     machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+//     machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+// }
+
+
+// void
+// ExceptionHandler(ExceptionType which)
+// {
+//     int type = machine->ReadRegister(2);
+
+//     if (which == SyscallException) {
+//     	switch (type) {
+//     		// Khi nguoi dung goi syscall halt.
+//     		case SC_Halt:
+//     			DEBUG('a', "Shutdown, initiated by user program.\n");
+// 	   			interrupt->Halt();
+	   			
+//     } else {
+// 		printf("Unexpected user mode exception %d %d\n", which, type);
+// 		ASSERT(FALSE);
+//     }
+// }
+
+
+
+// exception.cc 
+//	Entry point into the Nachos kernel from user programs.
+//	There are two kinds of things that can cause control to
+//	transfer back to here from user code:
+//
+//	syscall -- The user code explicitly requests to call a procedure
+//	in the Nachos kernel.  Right now, the only function we support is
+//	"Halt".
+//
+//	exceptions -- The user code does something that the CPU can't handle.
+//	For instance, accessing memory that doesn't exist, arithmetic errors,
+//	etc.  
+//
+//	Interrupts (which can also cause control to transfer from user
+//	code into the Nachos kernel) are handled elsewhere.
+//
+// For now, this only handles the Halt() system call.
+// Everything else core dumps.
+//
+// Copyright (c) 1992-1993 The Regents of the University of California.
+// All rights reserved.  See copyright.h for copyright notice and limitation 
+// of liability and disclaimer of warranty provisions.
+ 
+#include "copyright.h"
+#include "system.h"
+#include "syscall.h"
+ 
+//----------------------------------------------------------------------
+// ExceptionHandler
+// 	Entry point into the Nachos kernel.  Called when a user program
+//	is executing, and either does a syscall, or generates an addressing
+//	or arithmetic exception.
+//
+// 	For system calls, the following is the calling convention:
+//
+// 	system call code -- r2
+//		arg1 -- r4
+//		arg2 -- r5
+//		arg3 -- r6
+//		arg4 -- r7
+//
+//	The result of the system call, if any, must be put back into r2. 
+//
+// And don't forget to increment the pc before returning. (Or else you'll
+// loop making the same system call forever!
+//
+//	"which" is the kind of exception.  The list of possible exceptions 
+//	are in machine.h.
+//----------------------------------------------------------------------
+ 
+// Tang Program Counter
+void incProgCounter() {
+	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+	machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+	machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg) + 4);
 }
+ 
+void handleRuntimeError(const char msg[]) {
+		DEBUG('a', (char *)msg);
+		printf("%s", msg);
+		interrupt->Halt();
+}
+
 
 //ham luu tru ki tu thua.
 void extraCharacterRecycle(){
@@ -217,54 +302,82 @@ void
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
-
-    if (which == SyscallException) {
-    	switch (type) {
-    		// Khi nguoi dung goi syscall halt.
-    		case SC_Halt:
-    			DEBUG('a', "Shutdown, initiated by user program.\n");
-	   			interrupt->Halt();
-	   			break;
-		// Khi nguoi dung goi syscall ReadChar.
-		case SC_ReadChar:            	
-			char e;
-			e = ReadChar();
-			machine->WriteRegister(2,e);
-			break;	
-		// Khi nguoi dung goi syscall PrintChar.
-		case SC_PrintChar:
-			char d;
-			d = machine->ReadRegister(4);
-			PrintChar(d);
+ 
+	switch (which) {
+		case NoException:
+			return;
+		case PageFaultException:
+			handleRuntimeError("\n PageFaultException: No valid translation found.");
 			break;
-		// Khi nguoi dung goi syscall ReadInt.
-		case SC_ReadInt:            	
-			int g;
-			g = ReadInt();
-			machine->WriteRegister(2,g);
+ 
+		case ReadOnlyException:
+			handleRuntimeError("\n ReadOnlyException: Write attempted to page marked \"read-only\".");
 			break;
-		// Khi nguoi dung goi syscall PrintInt.
-		case SC_PrintInt:
-			int m;
-			m = machine->ReadRegister(4);
-			PrintInt(m);
+ 
+		case BusErrorException:
+			handleRuntimeError("\n BusErrorException: Translation resulted invalid physical address.");
 			break;
-		// Khi nguoi dung goi syscall ReadString.
-		case SC_ReadString:            	
-			int length;
-			length = machine->ReadRegister(5);
-			char* buffer;
-			ReadString(buffer,length);
+ 
+		case AddressErrorException:
+			handleRuntimeError("\n AddressErrorException: Unaligned reference or one that was beyond the end of the address space.");
 			break;
-		// Khi nguoi dung goi syscall PrintString.
-		case SC_PrintString:            	
-			char* buf;
-			PrintString(buf);
+ 
+		case OverflowException:
+			handleRuntimeError("\n OverflowException: Integer overflow in add or sub.");
 			break;
-        }
-        fetchNext();//tang thanh ghi
-    } else {
-		printf("Unexpected user mode exception %d %d\n", which, type);
-		ASSERT(FALSE);
-    }
+ 
+		case IllegalInstrException:
+			handleRuntimeError("\n IllegalInstrException: Unimplemented or reserved instr.");
+			break;
+ 
+		case NumExceptionTypes:
+			handleRuntimeError("\n NumExceptionTypes: Number exception types.");
+			break;
+ 
+		case SyscallException:
+			switch (type) {
+				case SC_Halt:
+					DEBUG('a', "Shutdown, initiated by user program.\n");
+					printf("Shutdown, initiated by user program.\n");
+				   	interrupt->Halt();
+				   	break;
+				// Khi nguoi dung goi syscall ReadChar.
+				case SC_ReadChar:            	
+					char e;
+					e = ReadChar();
+					machine->WriteRegister(2,e);
+					break;	
+				// Khi nguoi dung goi syscall PrintChar.
+				case SC_PrintChar:
+					char d;
+					d = machine->ReadRegister(4);
+					PrintChar(d);
+					break;
+				// Khi nguoi dung goi syscall ReadInt.
+				case SC_ReadInt:            	
+					int g;
+					g = ReadInt();
+					machine->WriteRegister(2,g);
+					break;
+				// Khi nguoi dung goi syscall PrintInt.
+				case SC_PrintInt:
+					int m;
+					m = machine->ReadRegister(4);
+					PrintInt(m);
+					break;
+				// Khi nguoi dung goi syscall ReadString.
+				case SC_ReadString:            	
+					int length;
+					length = machine->ReadRegister(5);
+					char* buffer;
+					ReadString(buffer,length);
+					break;
+				// Khi nguoi dung goi syscall PrintString.
+				case SC_PrintString:            	
+					char* buf;
+					PrintString(buf);
+					break;
+		    }
+		    incProgCounter();//tang thanh ghi
+	}
 }
