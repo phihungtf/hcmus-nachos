@@ -16,7 +16,9 @@
 #include "stats.h"
 #include "timer.h"
 #include "synchcons.h"
-
+#include "ptable.h"
+#include "bitmap.h"
+#include "synch.h"
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
 						// called before anything else
@@ -30,10 +32,14 @@ extern Interrupt *interrupt;			// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 extern SynchConsole* synchconsole;
-
+extern Lock* addrLock;
 #ifdef USER_PROGRAM
 #include "machine.h"
 extern Machine* machine;	// user program memory and registers
+extern PTable* processTab;
+extern BitMap* physFrameMarker; // bitmap de danh dau cac trang vat ly
+
+extern STable* semTab;
 #endif
 
 #ifdef FILESYS_NEEDED 		// FILESYS or FILESYS_STUB 
@@ -49,6 +55,8 @@ extern SynchDisk   *synchDisk;
 #ifdef NETWORK
 #include "post.h"
 extern PostOffice* postOffice;
+
 #endif
 
 #endif // SYSTEM_H
+
