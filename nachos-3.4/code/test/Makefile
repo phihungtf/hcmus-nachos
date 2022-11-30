@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort ReadPrintInt ReadPrintChar ReadPrintString BubbleSort Help ascii
+all: halt shell matmult sort ReadPrintInt ReadPrintChar ReadPrintString BubbleSort Help ascii execjoin ping pong join semaphore
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -101,3 +101,33 @@ ascii.o: ascii.c
 ascii: ascii.o start.o
 	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
 	../bin/coff2noff ascii.coff ascii
+
+execjoin.o: execjoin.c
+	$(CC) $(CFLAGS) -c execjoin.c
+execjoin: execjoin.o start.o
+	$(LD) $(LDFLAGS) start.o execjoin.o -o execjoin.coff
+	../bin/coff2noff execjoin.coff execjoin
+
+ping.o: ping.c
+	$(CC) $(CFLAGS) -c ping.c
+ping: ping.o start.o
+	$(LD) $(LDFLAGS) start.o ping.o -o ping.coff
+	../bin/coff2noff ping.coff ping
+
+pong.o: pong.c
+	$(CC) $(CFLAGS) -c pong.c
+pong: pong.o start.o
+	$(LD) $(LDFLAGS) start.o pong.o -o pong.coff
+	../bin/coff2noff pong.coff pong
+
+join.o: join.c
+	$(CC) $(CFLAGS) -c join.c
+join: join.o start.o
+	$(LD) $(LDFLAGS) start.o join.o -o join.coff
+	../bin/coff2noff join.coff join
+
+semaphore.o: semaphore.c
+	$(CC) $(CFLAGS) -c semaphore.c
+semaphore: semaphore.o start.o
+	$(LD) $(LDFLAGS) start.o semaphore.o -o semaphore.coff
+	../bin/coff2noff semaphore.coff semaphore

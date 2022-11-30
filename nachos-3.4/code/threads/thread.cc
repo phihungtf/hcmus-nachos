@@ -318,3 +318,4 @@ Thread::RestoreUserState()
 	machine->WriteRegister(i, userRegisters[i]);
 }
 #endif
+
