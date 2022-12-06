@@ -41,7 +41,7 @@
 
 #define MAX_FILE 10
 
-#ifdef FILESYS_STUB // Temporarily implement file system calls as
+#ifdef FILESYS_NEEDED // Temporarily implement file system calls as
 // calls to UNIX, until the real file system
 // implementation is available
 class FileSystem
