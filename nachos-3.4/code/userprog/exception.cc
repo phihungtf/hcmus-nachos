@@ -457,7 +457,7 @@ ExceptionHandler(ExceptionType which)
 					if (fileSystem->openf[id]->type == 2)
 					{
 						// Su dung ham Read cua lop SynchConsole de tra ve so byte thuc su doc duoc
-						int size = gSynchConsole->Read(buf, charcount); 
+						int size = synchconsole->Read(buf, charcount); 
 						System2User(virtAddr, size, buf); // Copy chuoi tu vung nho System Space sang User Space voi bo dem buffer co do dai la so byte thuc su
 						machine->WriteRegister(2, size); // Tra ve so byte thuc su doc duoc
 						delete buf;
@@ -539,11 +539,11 @@ ExceptionHandler(ExceptionType which)
 						int i = 0;
 						while (buf[i] != 0 && buf[i] != '\n') // Vong lap de write den khi gap ky tu '\n'
 						{
-							gSynchConsole->Write(buf + i, 1); // Su dung ham Write cua lop SynchConsole 
+							synchconsole->Write(buf + i, 1); // Su dung ham Write cua lop SynchConsole 
 							i++;
 						}
 						buf[i] = '\n';
-						gSynchConsole->Write(buf + i, 1); // Write ky tu '\n'
+						synchconsole->Write(buf + i, 1); // Write ky tu '\n'
 						machine->WriteRegister(2, i - 1); // Tra ve so byte thuc su write duoc
 						delete buf;
 						incProgCounter();
