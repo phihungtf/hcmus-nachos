@@ -255,6 +255,36 @@ void CreateFile(char* filename){
 	return;
 }
 
+// Ham mo file
+void OpenFile(char* filename, int type) {
+	int freeSlot = fileSystem->FindFreeSlot();
+	if (freeSlot != -1) //Chi xu li khi con slot trong
+	{
+		if (type == 0 || type == 1) //chi xu li khi type = 0 hoac 1
+		{
+			
+			if ((fileSystem->openf[freeSlot] = fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
+			{
+				machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
+			}
+		}
+		else if (type == 2) // xu li stdin voi type quy uoc la 2
+		{
+			machine->WriteRegister(2, 0); //tra ve OpenFileID
+		}
+		else // xu li stdout voi type quy uoc la 3
+		{
+			machine->WriteRegister(2, 1); //tra ve OpenFileID
+		}
+		delete[] filename;
+		return;
+	}
+	machine->WriteRegister(2, -1); //Khong mo duoc file return -1
+	
+	delete[] filename;
+	return;
+}
+
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -366,33 +396,7 @@ ExceptionHandler(ExceptionType which)
 					char* filename;
 					filename = User2System(virtAddr, 32); // Copy chuoi tu vung nho User Space sang System Space voi bo dem name dai 32
 					//Kiem tra xem OS con mo dc file khong
-					
-					// update 4/1/2018
-					int freeSlot = fileSystem->FindFreeSlot();
-					if (freeSlot != -1) //Chi xu li khi con slot trong
-					{
-						if (type == 0 || type == 1) //chi xu li khi type = 0 hoac 1
-						{
-							
-							if ((fileSystem->openf[freeSlot] = fileSystem->Open(filename, type)) != NULL) //Mo file thanh cong
-							{
-								machine->WriteRegister(2, freeSlot); //tra ve OpenFileID
-							}
-						}
-						else if (type == 2) // xu li stdin voi type quy uoc la 2
-						{
-							machine->WriteRegister(2, 0); //tra ve OpenFileID
-						}
-						else // xu li stdout voi type quy uoc la 3
-						{
-							machine->WriteRegister(2, 1); //tra ve OpenFileID
-						}
-						delete[] filename;
-						break;
-					}
-					machine->WriteRegister(2, -1); //Khong mo duoc file return -1
-					
-					delete[] filename;
+					OpenFile(filename, type);
 					break;
 				}
 

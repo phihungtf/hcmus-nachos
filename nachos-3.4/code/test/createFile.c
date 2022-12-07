@@ -2,13 +2,13 @@
 
 int main() {
 	OpenFileId id;
-	char buffer[12];
+	char buffer[13];
 	Create("test.txt");
 	id = Open("test.txt", 0);
-	Write("Hello, World", 12, id);
+	Write("Hello, World!", 13, id);
 	Close(id);
 	id = Open("test.txt", 1);
-	Read(buffer, 12, id);
+	Read(buffer, 13, id);
 	Close(id);
 	PrintString(buffer);
 	PrintString("\n");
