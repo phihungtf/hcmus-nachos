@@ -373,21 +373,18 @@ void WriteFile(int charcount, OpenFileId id) {
     if (id < 0 || id > 14) {
         printf("\nKhong the write vi id nam ngoai bang mo ta file.");
         machine->WriteRegister(2, -1);
-        incProgCounter();
         return;
     }
     // Kiem tra file co ton tai khong
     if (fileSystem->openf[id] == NULL) {
         printf("\nKhong the write vi file nay khong ton tai.");
         machine->WriteRegister(2, -1);
-        incProgCounter();
         return;
     }
     // Xet truong hop ghi file only read (type quy uoc la 1) hoac file stdin (type quy uoc la 2) thi tra ve -1
     if (fileSystem->openf[id]->type == 1 || fileSystem->openf[id]->type == 2) {
         printf("\nKhong the write file stdin hoac file only read.");
         machine->WriteRegister(2, -1);
-        incProgCounter();
         return;
     }
     OldPos = fileSystem->openf[id]->GetCurrentPos();  // Kiem tra thanh cong thi lay vi tri OldPos
@@ -399,7 +396,6 @@ void WriteFile(int charcount, OpenFileId id) {
             NewPos = fileSystem->openf[id]->GetCurrentPos();
             machine->WriteRegister(2, NewPos - OldPos);
             delete buf;
-            incProgCounter();
             return;
         }
     }
@@ -415,7 +411,6 @@ void WriteFile(int charcount, OpenFileId id) {
         synchconsole->Write(buf + i, 1);   // Write ky tu '\n'
         machine->WriteRegister(2, i - 1);  // Tra ve so byte thuc su write duoc
         delete buf;
-        incProgCounter();
         return;
     }
 }
