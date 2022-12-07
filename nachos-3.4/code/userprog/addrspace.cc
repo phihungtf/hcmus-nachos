@@ -17,6 +17,10 @@
 
 #include "addrspace.h"
 
+#include "copyright.h"
+#include "noff.h"
+#include "system.h"
+
 #ifdef HOST_SPARC
 #include <strings.h>
 #endif
