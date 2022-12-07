@@ -15,6 +15,8 @@
 
 #include "copyright.h"
 #include "filesys.h"
+#include "noff.h"
+#include "system.h"
 
 #define UserStackSize 1024  // increase this as necessary!
 
