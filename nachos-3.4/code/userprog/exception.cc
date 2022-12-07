@@ -220,6 +220,41 @@ void PrintString(char* buffer){
 	//synchconsole->Write("\n",1);
 }
 
+// Ham tao file
+void CreateFile(char* filename){
+	if (strlen(filename) == 0)
+	{
+		printf("\n File name is not valid");
+		DEBUG('a', "\n File name is not valid");
+		machine->WriteRegister(2, -1); //Return -1 vao thanh ghi R2
+		return;
+	}
+	
+	if (filename == NULL)  //Neu khong doc duoc
+	{
+		printf("\n Not enough memory in system");
+		DEBUG('a', "\n Not enough memory in system");
+		machine->WriteRegister(2, -1); //Return -1 vao thanh ghi R2
+		delete filename;
+		return;
+	}
+	DEBUG('a', "\n Finish reading filename.");
+	
+	if (!fileSystem->Create(filename, 0)) //Tao file bang ham Create cua fileSystem, tra ve ket qua
+	{
+		//Tao file that bai
+		printf("\n Error create file '%s'", filename);
+		machine->WriteRegister(2, -1);
+		delete filename;
+		return;
+	}
+	
+	//Tao file thanh cong
+	machine->WriteRegister(2, 0);
+	delete filename;
+	return;
+}
+
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -309,50 +344,13 @@ ExceptionHandler(ExceptionType which)
 					char* filename;
 					DEBUG('a', "\n SC_CreateFile call ...");
 					DEBUG('a', "\n Reading virtual address of filename");
-
+					
 					virtAddr = machine->ReadRegister(4); //Doc dia chi cua file tu thanh ghi R4
 					DEBUG('a', "\n Reading filename.");
 					
 					//Sao chep khong gian bo nho User sang System, voi do dang toi da la (32 + 1) bytes
 					filename = User2System(virtAddr, 32 + 1);
-					if (strlen(filename) == 0)
-					{
-						printf("\n File name is not valid");
-						DEBUG('a', "\n File name is not valid");
-						machine->WriteRegister(2, -1); //Return -1 vao thanh ghi R2
-						//incProgCounter();
-						//return;
-						break;
-					}
-					
-					if (filename == NULL)  //Neu khong doc duoc
-					{
-						printf("\n Not enough memory in system");
-						DEBUG('a', "\n Not enough memory in system");
-						machine->WriteRegister(2, -1); //Return -1 vao thanh ghi R2
-						delete filename;
-						//incProgCounter();
-						//return;
-						break;
-					}
-					DEBUG('a', "\n Finish reading filename.");
-					
-					if (!fileSystem->Create(filename, 0)) //Tao file bang ham Create cua fileSystem, tra ve ket qua
-					{
-						//Tao file that bai
-						printf("\n Error create file '%s'", filename);
-						machine->WriteRegister(2, -1);
-						delete filename;
-						//incProgCounter();
-						//return;
-						break;
-					}
-					
-					//Tao file thanh cong
-					machine->WriteRegister(2, 0);
-					delete filename;
-					//incProgCounter(); //Day thanh ghi lui ve sau de tiep tuc ghi
-					//return;
+					CreateFile(filename);
 					break;
 				}
 			
