@@ -488,6 +488,7 @@ ExceptionHandler(ExceptionType which)
 					int charcount = machine->ReadRegister(5); // Lay charcount tu thanh ghi so 5
 					int id = machine->ReadRegister(6); // Lay id cua file tu thanh ghi so 6
 					ReadFile(charcount, id);
+					break;
 				}
 				
 
