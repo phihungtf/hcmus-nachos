@@ -22,9 +22,9 @@
 #define MACHINE_H
 
 #include "copyright.h"
-#include "disk.h"
-#include "translate.h"
 #include "utility.h"
+#include "translate.h"
+#include "disk.h"
 
 // Definitions related to the size, and format of user memory
 
