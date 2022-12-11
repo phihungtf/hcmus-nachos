@@ -22,8 +22,8 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
-#include "system.h"
 #include "syscall.h"
+#include "system.h"
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -266,7 +266,7 @@ void CreateFile(char *filename) {
 }
 
 // Ham mo file
-void OpenFile(char *filename, int type) {
+void OpenaFile(char *filename, int type) {
     int freeSlot = fileSystem->FindFreeSlot();
     if (freeSlot != -1)  // Chi xu li khi con slot trong
     {
@@ -522,7 +522,7 @@ void ExceptionHandler(ExceptionType which) {
                     char *filename;
                     filename = User2System(virtAddr, 32);  // Copy chuoi tu vung nho User Space sang System Space voi bo dem name dai 32
                     // Kiem tra xem OS con mo dc file khong
-                    OpenFile(filename, type);
+                    OpenaFile(filename, type);
                     break;
                 }
 
