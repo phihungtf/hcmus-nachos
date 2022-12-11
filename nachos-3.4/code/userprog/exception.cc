@@ -530,7 +530,6 @@ void Signal(char *name) {
         machine->WriteRegister(2, -1);
         delete[] name;
         return;
-        break;
     }
 
     delete[] name;
