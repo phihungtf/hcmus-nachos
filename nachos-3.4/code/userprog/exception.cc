@@ -22,8 +22,8 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
-#include "system.h"
 #include "syscall.h"
+#include "system.h"
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -233,6 +233,9 @@ void PrintString(char *buffer) {
 
 // Ham tao file
 void CreateFile(char *filename) {
+    // Input: Dia chi tu vung nho user cua ten file
+    // Output: -1 = Loi, 0 = Thanh cong
+    // Chuc nang: Tao ra file voi tham so la ten file
     if (strlen(filename) == 0) {
         printf("\n File name is not valid");
         DEBUG('a', "\n File name is not valid");
@@ -415,6 +418,126 @@ void WriteFile(int charcount, OpenFileId id) {
     }
 }
 
+void Exec(char *name) {
+    // Input: vi tri int
+    // Output: Fail return -1, Success: return id cua thread dang chay
+    // SpaceId Exec(char *name);
+    if (name == NULL) {
+        DEBUG('a', "\n Not enough memory in System");
+        printf("\n Not enough memory in System");
+        machine->WriteRegister(2, -1);
+        return;
+    }
+    OpenFile *oFile = fileSystem->Open(name);
+    if (oFile == NULL) {
+        printf("\nExec:: Can't open this file.");
+        machine->WriteRegister(2, -1);
+        return;
+    }
+
+    delete oFile;
+
+    // Return child process id
+    int id = pTab->ExecUpdate(name);
+    machine->WriteRegister(2, id);
+
+    delete[] name;
+    return;
+}
+
+void Join(int id) {
+    // int Join(SpaceId id)
+    // Input: id dia chi cua thread
+    // Output:
+    int res = pTab->JoinUpdate(id);
+    machine->WriteRegister(2, res);
+}
+
+void Exit(int status) {
+    // void Exit(int status);
+    //  Input: status code
+    if (exitStatus != 0) return;
+
+    int res = pTab->ExitUpdate(status);
+
+    currentThread->FreeSpace();
+    currentThread->Finish();
+    return;
+}
+
+void createSemaphore(char *name, int semval) {
+    if (name == NULL) {
+        DEBUG('a', "\n Not enough memory in System");
+        printf("\n Not enough memory in System");
+        machine->WriteRegister(2, -1);
+        delete[] name;
+        return;
+    }
+
+    int res = semTab->Create(name, semval);
+
+    if (res == -1) {
+        DEBUG('a', "\n Khong the khoi tao semaphore");
+        printf("\n Khong the khoi tao semaphore");
+        machine->WriteRegister(2, -1);
+        delete[] name;
+        return;
+    }
+
+    delete[] name;
+    machine->WriteRegister(2, res);
+    return;
+}
+
+void Wait(char *name) {
+    if (name == NULL) {
+        DEBUG('a', "\n Not enough memory in System");
+        printf("\n Not enough memory in System");
+        machine->WriteRegister(2, -1);
+        delete[] name;
+        return;
+    }
+
+    int res = semTab->Wait(name);
+
+    if (res == -1) {
+        DEBUG('a', "\n Khong ton tai ten semaphore nay!");
+        printf("\n Khong ton tai ten semaphore nay!");
+        machine->WriteRegister(2, -1);
+        delete[] name;
+        return;
+    }
+
+    delete[] name;
+    machine->WriteRegister(2, res);
+    return;
+}
+
+void Signal(char *name) {
+    if (name == NULL) {
+        DEBUG('a', "\n Not enough memory in System");
+        printf("\n Not enough memory in System");
+        machine->WriteRegister(2, -1);
+        delete[] name;
+        return;
+    }
+
+    int res = semTab->Signal(name);
+
+    if (res == -1) {
+        DEBUG('a', "\n Khong ton tai ten semaphore nay!");
+        printf("\n Khong ton tai ten semaphore nay!");
+        machine->WriteRegister(2, -1);
+        delete[] name;
+        return;
+        break;
+    }
+
+    delete[] name;
+    machine->WriteRegister(2, res);
+    return;
+}
+
 void ExceptionHandler(ExceptionType which) {
     int type = machine->ReadRegister(2);
 
@@ -451,52 +574,62 @@ void ExceptionHandler(ExceptionType which) {
 
         case SyscallException:
             switch (type) {
-                case SC_Halt:
+                case SC_Halt: {
                     DEBUG('a', "Shutdown, initiated by user program.\n");
                     printf("Shutdown, initiated by user program.\n");
                     interrupt->Halt();
                     break;
+                }
+
                 // Khi nguoi dung goi syscall ReadChar.
-                case SC_ReadChar:
+                case SC_ReadChar: {
                     char e;
                     e = ReadChar();
                     machine->WriteRegister(2, e);
                     break;
+                }
+
                 // Khi nguoi dung goi syscall PrintChar.
-                case SC_PrintChar:
+                case SC_PrintChar: {
                     char d;
                     d = machine->ReadRegister(4);
                     PrintChar(d);
                     break;
+                }
+
                 // Khi nguoi dung goi syscall ReadInt.
-                case SC_ReadInt:
+                case SC_ReadInt: {
                     int g;
                     g = ReadInt();
                     machine->WriteRegister(2, g);
                     break;
+                }
+
                 // Khi nguoi dung goi syscall PrintInt.
-                case SC_PrintInt:
+                case SC_PrintInt: {
                     int m;
                     m = machine->ReadRegister(4);
                     PrintInt(m);
                     break;
+                }
+
                 // Khi nguoi dung goi syscall ReadString.
-                case SC_ReadString:
+                case SC_ReadString: {
                     int length;
                     length = machine->ReadRegister(5);
                     char *buffer;
                     ReadString(buffer, length);
                     break;
+                }
+
                 // Khi nguoi dung goi syscall PrintString.
-                case SC_PrintString:
+                case SC_PrintString: {
                     char *buf;
                     PrintString(buf);
                     break;
+                }
 
                 case SC_Create: {
-                    // Input: Dia chi tu vung nho user cua ten file
-                    // Output: -1 = Loi, 0 = Thanh cong
-                    // Chuc nang: Tao ra file voi tham so la ten file
                     int virtAddr;
                     char *filename;
                     DEBUG('a', "\n SC_CreateFile call ...");
@@ -548,173 +681,45 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
                 case SC_Exec: {
-                    // Input: vi tri int
-                    // Output: Fail return -1, Success: return id cua thread dang chay
-                    // SpaceId Exec(char *name);
-                    int virtAddr;
-                    virtAddr = machine->ReadRegister(4);  // doc dia chi ten chuong trinh tu thanh ghi r4
-                    char *name;
-                    name = User2System(virtAddr, 32 + 1);  // Lay ten chuong trinh, nap vao kernel
-
-                    if (name == NULL) {
-                        DEBUG('a', "\n Not enough memory in System");
-                        printf("\n Not enough memory in System");
-                        machine->WriteRegister(2, -1);
-                        // IncreasePC();
-                        //  return;
-                        break;
-                    }
-                    OpenFile *oFile = fileSystem->Open(name);
-                    if (oFile == NULL) {
-                        printf("\nExec:: Can't open this file.");
-                        machine->WriteRegister(2, -1);
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    delete oFile;
-
-                    // Return child process id
-                    int id = pTab->ExecUpdate(name);
-                    machine->WriteRegister(2, id);
-
-                    delete[] name;
-                    // IncreasePC();
-                    // return;
+                    int virtAddr = machine->ReadRegister(4);     // doc dia chi ten chuong trinh tu thanh ghi r4
+                    char *name = User2System(virtAddr, 32 + 1);  // Lay ten chuong trinh, nap vao kernel
+                    Exec(name);
                     break;
                 }
+
                 case SC_Join: {
-                    // int Join(SpaceId id)
-                    // Input: id dia chi cua thread
-                    // Output:
                     int id = machine->ReadRegister(4);
-
-                    int res = pTab->JoinUpdate(id);
-
-                    machine->WriteRegister(2, res);
-                    // IncreasePC();
-                    // return;
+                    Join(id);
                     break;
                 }
                 case SC_Exit: {
-                    // void Exit(int status);
-                    //  Input: status code
                     int exitStatus = machine->ReadRegister(4);
-
-                    if (exitStatus != 0) {
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    int res = pTab->ExitUpdate(exitStatus);
-                    // machine->WriteRegister(2, res);
-
-                    currentThread->FreeSpace();
-                    currentThread->Finish();
-                    // IncreasePC();
-                    // return;
+                    Exit(exitStatus);
                     break;
                 }
+
                 case SC_CreateSemaphore: {
                     // int CreateSemaphore(char* name, int semval).
                     int virtAddr = machine->ReadRegister(4);
                     int semval = machine->ReadRegister(5);
 
                     char *name = User2System(virtAddr, 32 + 1);
-                    if (name == NULL) {
-                        DEBUG('a', "\n Not enough memory in System");
-                        printf("\n Not enough memory in System");
-                        machine->WriteRegister(2, -1);
-                        delete[] name;
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    int res = semTab->Create(name, semval);
-
-                    if (res == -1) {
-                        DEBUG('a', "\n Khong the khoi tao semaphore");
-                        printf("\n Khong the khoi tao semaphore");
-                        machine->WriteRegister(2, -1);
-                        delete[] name;
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    delete[] name;
-                    machine->WriteRegister(2, res);
-                    // IncreasePC();
-                    // return;
+                    createSemaphore(name, semval);
                     break;
                 }
 
                 case SC_Wait: {
                     // int Wait(char* name)
                     int virtAddr = machine->ReadRegister(4);
-
                     char *name = User2System(virtAddr, 32 + 1);
-                    if (name == NULL) {
-                        DEBUG('a', "\n Not enough memory in System");
-                        printf("\n Not enough memory in System");
-                        machine->WriteRegister(2, -1);
-                        delete[] name;
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    int res = semTab->Wait(name);
-
-                    if (res == -1) {
-                        DEBUG('a', "\n Khong ton tai ten semaphore nay!");
-                        printf("\n Khong ton tai ten semaphore nay!");
-                        machine->WriteRegister(2, -1);
-                        delete[] name;
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    delete[] name;
-                    machine->WriteRegister(2, res);
-                    // IncreasePC();
-                    // return;
+                    Wait(name);
                     break;
                 }
                 case SC_Signal: {
                     // int Signal(char* name)
                     int virtAddr = machine->ReadRegister(4);
-
                     char *name = User2System(virtAddr, 32 + 1);
-                    if (name == NULL) {
-                        DEBUG('a', "\n Not enough memory in System");
-                        printf("\n Not enough memory in System");
-                        machine->WriteRegister(2, -1);
-                        delete[] name;
-                        // IncreasePC();
-                        // return;
-                    }
-
-                    int res = semTab->Signal(name);
-
-                    if (res == -1) {
-                        DEBUG('a', "\n Khong ton tai ten semaphore nay!");
-                        printf("\n Khong ton tai ten semaphore nay!");
-                        machine->WriteRegister(2, -1);
-                        delete[] name;
-                        // IncreasePC();
-                        // return;
-                        break;
-                    }
-
-                    delete[] name;
-                    machine->WriteRegister(2, res);
-                    // IncreasePC();
-                    // return;
+                    Signal(name);
                     break;
                 }
             }

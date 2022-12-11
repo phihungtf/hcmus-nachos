@@ -116,6 +116,15 @@ int Read(char *buffer, int size, OpenFileId id);
 /* Close the file, we're done reading and writing to it. */
 void Close(OpenFileId id);
 
+// Ham cho semaphore
+// Success: 0 - Failed: -1
+// Ham tao 1 semaphore voi ten semaphore
+int CreateSemaphore(char *name, int semval);
+
+int Wait(char *name);
+
+int Signal(char *name);
+
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program.
  */
