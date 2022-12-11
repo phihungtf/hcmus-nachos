@@ -6,8 +6,8 @@
 #ifndef PCB_H
 #define PCB_H
 
-#include "synch.h"
 #include "thread.h"
+#include "synch.h"
 
 // Process Control Block
 class PCB {

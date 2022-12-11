@@ -2,11 +2,10 @@
 // All rights reserved.
 
 #include "pcb.h"
-
-#include "addrspace.h"
+#include "utility.h"
 #include "system.h"
 #include "thread.h"
-#include "utility.h"
+#include "addrspace.h"
 
 extern void StartProcess_2(int id);
 
