@@ -418,7 +418,7 @@ void WriteFile(int charcount, OpenFileId id) {
     }
 }
 
-void Exec(char *name) {
+void _Exec(char *name) {
     // Input: vi tri int
     // Output: Fail return -1, Success: return id cua thread dang chay
     // SpaceId Exec(char *name);
@@ -445,7 +445,7 @@ void Exec(char *name) {
     return;
 }
 
-void Join(int id) {
+void _Join(int id) {
     // int Join(SpaceId id)
     // Input: id dia chi cua thread
     // Output:
@@ -453,10 +453,10 @@ void Join(int id) {
     machine->WriteRegister(2, res);
 }
 
-void Exit(int status) {
+void _Exit(int status) {
     // void Exit(int status);
     //  Input: status code
-    if (exitStatus != 0) return;
+    if (status != 0) return;
 
     int res = pTab->ExitUpdate(status);
 
@@ -465,7 +465,7 @@ void Exit(int status) {
     return;
 }
 
-void createSemaphore(char *name, int semval) {
+void _createSemaphore(char *name, int semval) {
     if (name == NULL) {
         DEBUG('a', "\n Not enough memory in System");
         printf("\n Not enough memory in System");
@@ -489,7 +489,7 @@ void createSemaphore(char *name, int semval) {
     return;
 }
 
-void Wait(char *name) {
+void _Wait(char *name) {
     if (name == NULL) {
         DEBUG('a', "\n Not enough memory in System");
         printf("\n Not enough memory in System");
@@ -513,7 +513,7 @@ void Wait(char *name) {
     return;
 }
 
-void Signal(char *name) {
+void _Signal(char *name) {
     if (name == NULL) {
         DEBUG('a', "\n Not enough memory in System");
         printf("\n Not enough memory in System");
@@ -682,18 +682,18 @@ void ExceptionHandler(ExceptionType which) {
                 case SC_Exec: {
                     int virtAddr = machine->ReadRegister(4);     // doc dia chi ten chuong trinh tu thanh ghi r4
                     char *name = User2System(virtAddr, 32 + 1);  // Lay ten chuong trinh, nap vao kernel
-                    Exec(name);
+                    _Exec(name);
                     break;
                 }
 
                 case SC_Join: {
                     int id = machine->ReadRegister(4);
-                    Join(id);
+                    _Join(id);
                     break;
                 }
                 case SC_Exit: {
                     int exitStatus = machine->ReadRegister(4);
-                    Exit(exitStatus);
+                    _Exit(exitStatus);
                     break;
                 }
 
@@ -703,7 +703,7 @@ void ExceptionHandler(ExceptionType which) {
                     int semval = machine->ReadRegister(5);
 
                     char *name = User2System(virtAddr, 32 + 1);
-                    createSemaphore(name, semval);
+                    _createSemaphore(name, semval);
                     break;
                 }
 
@@ -711,14 +711,14 @@ void ExceptionHandler(ExceptionType which) {
                     // int Wait(char* name)
                     int virtAddr = machine->ReadRegister(4);
                     char *name = User2System(virtAddr, 32 + 1);
-                    Wait(name);
+                    _Wait(name);
                     break;
                 }
                 case SC_Signal: {
                     // int Signal(char* name)
                     int virtAddr = machine->ReadRegister(4);
                     char *name = User2System(virtAddr, 32 + 1);
-                    Signal(name);
+                    _Signal(name);
                     break;
                 }
             }
