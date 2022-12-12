@@ -8,16 +8,16 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "bitmap.h"
 #include "copyright.h"
-#include "interrupt.h"
-#include "ptable.h"
-#include "scheduler.h"
-#include "stable.h"
-#include "stats.h"
-#include "thread.h"
-#include "timer.h"
 #include "utility.h"
+#include "thread.h"
+#include "scheduler.h"
+#include "interrupt.h"
+#include "stats.h"
+#include "timer.h"
+#include "bitmap.h"
+#include "ptable.h"
+#include "stable.h"
 
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv);  // Initialization,
