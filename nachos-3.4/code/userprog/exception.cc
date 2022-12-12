@@ -628,13 +628,14 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Create
                 case SC_Create: {
                     int virtAddr;
                     char *filename;
                     DEBUG('a', "\n SC_CreateFile call ...");
                     DEBUG('a', "\n Reading virtual address of filename");
 
-                    virtAddr = machine->ReadRegister(4);  // Doc dia chi cua file tu thanh ghi R4
+                    virtAddr = machine->ReadRegister(4);
                     DEBUG('a', "\n Reading filename.");
 
                     // Sao chep khong gian bo nho User sang System, voi do dang toi da la (32 + 1) bytes
@@ -643,6 +644,7 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Open
                 case SC_Open: {
                     // Input: arg1: Dia chi cua chuoi name, arg2: type
                     // Output: Tra ve OpenFileID neu thanh, -1 neu loi
@@ -658,6 +660,7 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Close
                 case SC_Close: {
                     // Input id cua file(OpenFileID)
                     //  Output: 0: thanh cong, -1 that bai
@@ -666,6 +669,7 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Read
                 case SC_Read: {
                     int charcount = machine->ReadRegister(5);  // Lay charcount tu thanh ghi so 5
                     int id = machine->ReadRegister(6);         // Lay id cua file tu thanh ghi so 6
@@ -673,12 +677,15 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Write
                 case SC_Write: {
                     int charcount = machine->ReadRegister(5);  // Lay charcount tu thanh ghi so 5
                     int id = machine->ReadRegister(6);         // Lay id cua file tu thanh ghi so 6
                     WriteFile(charcount, id);
                     break;
                 }
+
+                    // Khi nguoi dung goi syscall Exec
                 case SC_Exec: {
                     int virtAddr = machine->ReadRegister(4);     // doc dia chi ten chuong trinh tu thanh ghi r4
                     char *name = User2System(virtAddr, 32 + 1);  // Lay ten chuong trinh, nap vao kernel
@@ -686,17 +693,21 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Join
                 case SC_Join: {
                     int id = machine->ReadRegister(4);
                     _Join(id);
                     break;
                 }
+
+                    // Khi nguoi dung goi syscall Exit
                 case SC_Exit: {
                     int exitStatus = machine->ReadRegister(4);
                     _Exit(exitStatus);
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall CreateSemaphore
                 case SC_CreateSemaphore: {
                     // int CreateSemaphore(char* name, int semval).
                     int virtAddr = machine->ReadRegister(4);
@@ -707,6 +718,7 @@ void ExceptionHandler(ExceptionType which) {
                     break;
                 }
 
+                    // Khi nguoi dung goi syscall Wait
                 case SC_Wait: {
                     // int Wait(char* name)
                     int virtAddr = machine->ReadRegister(4);
@@ -714,6 +726,8 @@ void ExceptionHandler(ExceptionType which) {
                     _Wait(name);
                     break;
                 }
+
+                    // Khi nguoi dung goi syscall Signal
                 case SC_Signal: {
                     // int Signal(char* name)
                     int virtAddr = machine->ReadRegister(4);
