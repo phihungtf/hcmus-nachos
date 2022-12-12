@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort ReadPrintInt ReadPrintChar ReadPrintString BubbleSort Help ascii createFile ping pong pingpong
+all: halt shell matmult sort ReadPrintInt ReadPrintChar ReadPrintString help ascii createFile ping pong pingpong
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -84,17 +84,11 @@ ReadPrintString: ReadPrintString.o start.o
 	$(LD) $(LDFLAGS) start.o ReadPrintString.o -o ReadPrintString.coff
 	../bin/coff2noff ReadPrintString.coff ReadPrintString
 
-BubbleSort.o: BubbleSort.c
-	$(CC) $(CFLAGS) -c BubbleSort.c
-BubbleSort: BubbleSort.o start.o
-	$(LD) $(LDFLAGS) start.o BubbleSort.o -o BubbleSort.coff
-	../bin/coff2noff BubbleSort.coff BubbleSort
-
-Help.o: Help.c
-	$(CC) $(CFLAGS) -c Help.c
-Help: Help.o start.o
-	$(LD) $(LDFLAGS) start.o Help.o -o Help.coff
-	../bin/coff2noff Help.coff Help
+help.o: help.c
+	$(CC) $(CFLAGS) -c help.c
+help: help.o start.o
+	$(LD) $(LDFLAGS) start.o help.o -o help.coff
+	../bin/coff2noff help.coff help
 
 ascii.o: ascii.c
 	$(CC) $(CFLAGS) -c ascii.c
