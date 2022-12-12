@@ -22,8 +22,8 @@
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
-#include "syscall.h"
 #include "system.h"
+#include "syscall.h"
 
 //----------------------------------------------------------------------
 // ExceptionHandler
